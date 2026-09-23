@@ -17,6 +17,8 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Subset
 import copy
 
+from src.data.ClassificationData import ClassificationData
+
 class ClassificationMLP(nn.Module):
     def __init__(
             self,
@@ -45,7 +47,7 @@ class ClassificationMLP(nn.Module):
         return logits.squeeze(-1)
 
 def create_dataloaders(
-        dataset,
+        dataset: ClassificationData,
         seed: int,
         train_ratio: float,
         val_ratio: float,
@@ -80,7 +82,7 @@ def create_dataloaders(
     test_set = Subset(dataset, test_indices.tolist())
 
     # Create dataloaders
-    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True)
+    train_loader = DataLoader(train_set, batch_size=batch_size, shuffle=True, generator=torch.Generator().manual_seed(seed))
     val_loader = DataLoader(val_set, batch_size=batch_size, shuffle=False)
     test_loader = DataLoader(test_set, batch_size=batch_size, shuffle=False)
 
@@ -114,4 +116,72 @@ def train_classification(
         model.train()
         train_loss = 0
         train_samples = 0
+
+        for feature, classification in train_loader:
+
+            # Zero + Forward pass
+            optimizer.zero_grad()
+            cls_logits = model(feature)
+
+            # Loss + Backprop
+            loss_cls = bce(cls_logits, classification)
+            loss_cls.backward()
+            optimizer.step()
+
+            # Logging
+            batch_size = feature.size(0)
+            train_loss += (loss_cls.item() * batch_size)
+            train_samples += batch_size
+
+        # Evaluation Loop
+        model.eval()
+        val_loss = 0
+        val_samples = 0
+
+        with torch.no_grad():
+            for feature, classification in val_loader:
+
+                # Forward pass
+                cls_logits = model(feature)
+
+                # Loss
+                loss_cls = bce(cls_logits, classification)
+
+                # Logging
+                batch_size = feature.size(0)
+                val_loss += (loss_cls.item() * batch_size)
+                val_samples += batch_size
+
+        # Convert to per sample epoch average losses
+        val_loss /= val_samples
+        train_loss /= train_samples
+
+        # Log Losses
+        history["train_loss"].append(train_loss)
+        history["val_loss"].append(val_loss)
+
+        # Update best epoch if needed
+        if val_loss < history['best_cls_loss']:
+            history["best_cls_loss"] = val_loss
+            history["patience_counter"] = 0
+            history["stop_epoch"] = epoch
+            torch.save({
+                "model_state_dict": model.state_dict(),
+                "history": copy.deepcopy(history)
+            }, f"{output_path}/best_model_state.pt")
+        else:
+            history["patience_counter"] += 1
+            if history["patience_counter"] >= patience:
+                print(f"Early Stopping triggered at epoch {epoch+1}")
+                break
+
+    checkpoint = torch.load(f"{output_path}/best_model_state.pt", weights_only=False)
+    model.load_state_dict(checkpoint["model_state_dict"])
+    return model.state_dict(), checkpoint["history"]
+
+
+
+
+
+
 
