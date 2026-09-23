@@ -51,8 +51,7 @@ def create_dataloaders(
         val_ratio: float,
         test_ratio: float,
         batch_size: int,
-        pre_split: dict | None = None
-):
+        pre_split: dict | None = None):
 
     # Ensure ratios workout correctly
     assert abs(train_ratio + val_ratio + test_ratio - 1.0) < 1e-6, "ratios must add to 1.0"
@@ -94,8 +93,7 @@ def train_classification(
         epochs: int,
         lr: float,
         patience: int,
-        output_path: str
-):
+        output_path: str):
 
     # Configuration for Training Loop
     optimizer = optim.Adam(model.parameters(), lr=lr)
