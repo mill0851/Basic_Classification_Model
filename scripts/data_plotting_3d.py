@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-data_path = "./data/gaussian_3d/gaussian_3d_narrow.csv"
-output_path = "./outputs/gaussian_3d_narrow_results"
+data_path = "./data/gaussian_3d/gaussian_3d_overlap.csv"
+output_path = "./outputs/gaussian_3d_overlap_results"
 
 coordinates, classifications = import_data(data_path)
 
