@@ -11,10 +11,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-data_path = "./data/gaussian_2d/gaussian_2d_overlap.csv"
-output_path = "./outputs/gaussian_2d_overlap_results"
+data_path = "./data/gaussian_3d/gaussian_3d_narrow.csv"
+output_path = "./outputs/gaussian_3d_narrow_results"
 
 coordinates, classifications = import_data(data_path)
+
+# Use the number of columns in the coordinate data (2 for 2D, 3 for 3D).
+input_dim = np.asarray(coordinates).shape[-1]
 
 dataset = ClassificationData(coordinates, classifications)
 
@@ -27,7 +30,7 @@ train_loader, val_loader, test_loader = create_dataloaders(
     batch_size=16
 )
 
-untrained_model = ClassificationMLP(2, 32, 2)
+untrained_model = ClassificationMLP(input_dim, 32, 2)
 
 trained_model_state, history = train_classification(
     model=untrained_model,
@@ -39,7 +42,7 @@ trained_model_state, history = train_classification(
     output_path=output_path
 )
 
-trained_model = ClassificationMLP(2, 32, 2)
+trained_model = ClassificationMLP(input_dim, 32, 2)
 trained_model.load_state_dict(trained_model_state)
 
 # Plot the saved training history
