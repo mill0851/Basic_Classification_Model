@@ -11,8 +11,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-data_path = "./data/gaussian_2d/gaussian_2d_overlap.csv"
-output_path = "./outputs/gaussian_2d_overlap_results"
+SEED = 1234
+
+data_path = "./data/moons_2d/moons_2d_wide.csv"
+output_path = "./outputs/moons_2d_wide_results"
 
 coordinates, classifications = import_data(data_path)
 
@@ -23,26 +25,26 @@ dataset = ClassificationData(coordinates, classifications)
 
 train_loader, val_loader, test_loader = create_dataloaders(
     dataset,
-    seed = 1234,
+    seed = SEED,
     train_ratio=0.75,
     val_ratio=0.15,
     test_ratio=0.10,
     batch_size=16
 )
 
-untrained_model = ClassificationMLP(input_dim, 32, 2)
+untrained_model = ClassificationMLP(input_dim, 32, 2, seed=SEED)
 
 trained_model_state, history = train_classification(
     model=untrained_model,
     train_loader=train_loader,
     val_loader=val_loader,
-    epochs=200,
+    epochs=300,
     lr=0.001,
-    patience=50,
+    patience=75,
     output_path=output_path
 )
 
-trained_model = ClassificationMLP(input_dim, 32, 2)
+trained_model = ClassificationMLP(input_dim, 32, 2, seed=SEED)
 trained_model.load_state_dict(trained_model_state)
 
 # Plot the saved training history
@@ -54,14 +56,14 @@ if train_losses or val_losses:
     if train_losses:
         axes[0].plot(range(1, len(train_losses) + 1), train_losses)
     axes[0].set_ylabel("Loss", fontsize=16)
-    axes[0].set_title("Training loss - 2D Gaussian (Overlap)", fontsize=18)
+    axes[0].set_title("Training loss - 2D Moons (Wide)", fontsize=18)
     axes[0].grid(alpha=0.8)
 
     if val_losses:
         axes[1].plot(range(1, len(val_losses) + 1), val_losses)
     axes[1].set_xlabel("Epoch", fontsize=16)
     axes[1].set_ylabel("Loss", fontsize=16)
-    axes[1].set_title("Validation loss - 2D Gaussian (Overlap)", fontsize=18)
+    axes[1].set_title("Validation loss - 2D Moons (Wide)", fontsize=18)
     axes[1].grid(alpha=0.8)
 
     figure.tight_layout()
@@ -87,7 +89,7 @@ plt.imshow(confusion_matrix.numpy(), cmap="Blues")
 plt.colorbar()
 plt.xlabel("Predicted label", fontsize=16)
 plt.ylabel("True label", fontsize=16)
-plt.title("Confusion matrix - 2D Gaussian (Overlap)", fontsize=18)
+plt.title("Confusion matrix - 2D Moons (Wide)", fontsize=18)
 plt.xticks([0, 1], [0, 1])
 plt.yticks([0, 1], [0, 1])
 for row in range(2):

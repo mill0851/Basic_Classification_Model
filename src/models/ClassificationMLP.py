@@ -6,10 +6,12 @@ Basic Implementation Details:
 > input_dim, hidden_dim, and n_layers can be configured at instantiation
 > ReLU is used for nonlinear activation
 > BCE is used as the loss function (sigmoid activation is applied internally)
-> 
+> passing `seed` at instantiation makes the weight initialization reproducible
 
 Created: 09/22/2026
 """
+
+import math
 
 import torch
 import torch.nn as nn
@@ -24,7 +26,8 @@ class ClassificationMLP(nn.Module):
             self,
             input_dim: int,
             hidden_dim: int,
-            n_layers: int
+            n_layers: int,
+            seed: int | None = None
     ):
         super().__init__()
 
@@ -40,6 +43,30 @@ class ClassificationMLP(nn.Module):
 
         self.shared = nn.Sequential(*layers)
         self.classification_head = nn.Linear(hidden_dim, 1)
+
+        if seed is not None:
+            self.initialize_weights(seed)
+
+    def initialize_weights(self, seed: int):
+        """Re-initialize every Linear layer from an explicitly seeded generator.
+
+        This reproduces the distribution PyTorch already uses for nn.Linear -
+        kaiming_uniform_(a=sqrt(5)) on the weight reduces to U(-b, b) with
+        b = 1/sqrt(fan_in), which is also the bias bound - but draws it from a
+        local generator instead of the global RNG. Seeding the global RNG would
+        work too, but it would leak into anything else drawing randomness later
+        (dataloader shuffling, dropout), so the same call would not stay
+        reproducible as the script grows.
+        """
+        generator = torch.Generator().manual_seed(seed)
+        with torch.no_grad():
+            for module in self.modules():
+                if not isinstance(module, nn.Linear):
+                    continue
+                bound = 1.0 / math.sqrt(module.in_features)
+                module.weight.uniform_(-bound, bound, generator=generator)
+                if module.bias is not None:
+                    module.bias.uniform_(-bound, bound, generator=generator)
 
     def forward(self, x):
         internal = self.shared(x)
