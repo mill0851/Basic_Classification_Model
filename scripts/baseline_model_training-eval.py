@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-data_path = "./data/gaussian_3d/gaussian_3d_overlap.csv"
-output_path = "./outputs/gaussian_3d_overlap_results"
+data_path = "./data/gaussian_2d/gaussian_2d_overlap.csv"
+output_path = "./outputs/gaussian_2d_overlap_results"
 
 coordinates, classifications = import_data(data_path)
 
@@ -53,14 +53,16 @@ if train_losses or val_losses:
 
     if train_losses:
         axes[0].plot(range(1, len(train_losses) + 1), train_losses)
-    axes[0].set_ylabel("Loss")
-    axes[0].set_title("Training loss")
+    axes[0].set_ylabel("Loss", fontsize=16)
+    axes[0].set_title("Training loss - 2D Gaussian (Overlap)", fontsize=18)
+    axes[0].grid(alpha=0.8)
 
     if val_losses:
         axes[1].plot(range(1, len(val_losses) + 1), val_losses)
-    axes[1].set_xlabel("Epoch")
-    axes[1].set_ylabel("Loss")
-    axes[1].set_title("Validation loss")
+    axes[1].set_xlabel("Epoch", fontsize=16)
+    axes[1].set_ylabel("Loss", fontsize=16)
+    axes[1].set_title("Validation loss - 2D Gaussian (Overlap)", fontsize=18)
+    axes[1].grid(alpha=0.8)
 
     figure.tight_layout()
     figure.savefig(os.path.join(output_path, "training_loss.png"))
@@ -83,15 +85,15 @@ with torch.no_grad():
 plt.figure()
 plt.imshow(confusion_matrix.numpy(), cmap="Blues")
 plt.colorbar()
-plt.xlabel("Predicted label")
-plt.ylabel("True label")
-plt.title("Confusion matrix")
+plt.xlabel("Predicted label", fontsize=16)
+plt.ylabel("True label", fontsize=16)
+plt.title("Confusion matrix - 2D Gaussian (Overlap)", fontsize=18)
 plt.xticks([0, 1], [0, 1])
 plt.yticks([0, 1], [0, 1])
 for row in range(2):
     for column in range(2):
         plt.text(column, row, int(confusion_matrix[row, column]),
-                 ha="center", va="center")
+                 ha="center", va="center", fontsize=16, fontweight="bold")
 plt.tight_layout()
 plt.savefig(os.path.join(output_path, "confusion_matrix.png"))
 plt.close()
