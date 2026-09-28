@@ -30,21 +30,21 @@ axis.scatter(
     coordinates[labels == 0, 1],
     coordinates[labels == 0, 2],
     color="green",
-    label="Label 0",
+    label="Class 0",
 )
 axis.scatter(
     coordinates[labels == 1, 0],
     coordinates[labels == 1, 1],
     coordinates[labels == 1, 2],
     color="red",
-    label="Label 1",
+    label="Class 1",
 )
-axis.set_xlabel("X1 coordinate")
-axis.set_ylabel("X2 coordinate")
-axis.set_zlabel("X3 coordinate")
-axis.set_title("3D Classification Data")
+axis.set_xlabel("X1 coordinate", fontsize=16)
+axis.set_ylabel("X2 coordinate", fontsize=16)
+axis.set_zlabel("X3 coordinate", fontsize=16)
+axis.set_title("3D Classification Data - Gaussian (Overlap)", fontsize=18)
 axis.grid(True)
-axis.legend()
+axis.legend(fontsize=16)
 figure.tight_layout()
 figure.savefig(os.path.join(output_path, "data_visualization.png"))
 plt.show()

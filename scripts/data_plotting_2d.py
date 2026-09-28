@@ -11,8 +11,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import torch
 
-data_path = "./data/gaussian_3d/gaussian_3d_narrow.csv"
-output_path = "./outputs/gaussian_3d_narrow_results"
+data_path = "./data/moons_2d/moons_2d_narrow.csv"
+output_path = "./outputs/moons_2d_narrow_results"
 
 coordinates, classifications = import_data(data_path)
 
@@ -28,19 +28,19 @@ plt.scatter(
     coordinates[labels == 0, 0],
     coordinates[labels == 0, 1],
     color="green",
-    label="Label 0",
+    label="Class 0",
 )
 plt.scatter(
     coordinates[labels == 1, 0],
     coordinates[labels == 1, 1],
     color="red",
-    label="Label 1",
+    label="Class 1",
 )
-plt.xlabel("X coordinate")
-plt.ylabel("Y coordinate")
-plt.title("2D Classification Data")
+plt.xlabel("X1 coordinate", fontsize=16)
+plt.ylabel("X2 coordinate", fontsize=16)
+plt.title("2D Classification Data - Moons (Narrow)", fontsize=18)
 plt.grid(True)
-plt.legend()
+plt.legend(fontsize=16)
 plt.tight_layout()
 plt.savefig(os.path.join(output_path, "data_visualization.png"))
 plt.show()
